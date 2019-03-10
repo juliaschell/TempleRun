@@ -252,4 +252,3 @@ window.LeftTurn = window.classes.LeftTurn = class LeftTurn extends Shape {
         }       
     }
 }
-}
