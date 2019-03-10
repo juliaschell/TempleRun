@@ -1,3 +1,7 @@
+//////////////////////////////////////////////////////
+//              ARCH
+//////////////////////////////////////////////////////
+
 window.Arch = window.classes.Arch = class Arch extends Shape {
     constructor(sections) {
         super("positions", "normals", "texture_coords");
@@ -61,6 +65,11 @@ window.Arch = window.classes.Arch = class Arch extends Shape {
     }
 }
 
+//////////////////////////////////////////////////////
+//              PATH
+//////////////////////////////////////////////////////
+
+
 window.Path = window.classes.Path = class Path extends Shape {
     constructor() {
         super("positions", "normals", "texture_coords");
@@ -108,6 +117,10 @@ window.Path = window.classes.Path = class Path extends Shape {
     
     }
 }
+
+//////////////////////////////////////////////////////
+//              RIGHT TURN
+//////////////////////////////////////////////////////
 
 window.RightTurn = window.classes.RightTurn = class RightTurn extends Shape {
     constructor() {
@@ -173,6 +186,9 @@ window.RightTurn = window.classes.RightTurn = class RightTurn extends Shape {
     }
 }
 
+//////////////////////////////////////////////////////
+//              LEFT TURN
+//////////////////////////////////////////////////////
 
 window.LeftTurn = window.classes.LeftTurn = class LeftTurn extends Shape {
     constructor() {
@@ -236,4 +252,5 @@ window.LeftTurn = window.classes.LeftTurn = class LeftTurn extends Shape {
         }        
     
     }
+}
 }
