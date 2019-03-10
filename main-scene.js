@@ -30,7 +30,8 @@ class Assignment_Two_Skeleton extends Scene_Component {
             'ball': new Subdivision_Sphere(4),
             'path' : new Path(),
             'right_turn' : new RightTurn(),
-            'left_turn' : new LeftTurn()
+            'left_turn' : new LeftTurn(),
+            'arch': new Arch()
         }
         this.submit_shapes(context, shapes);
         this.shape_count = Object.keys(shapes).length;
@@ -75,7 +76,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         this.thisPath = 'S';
 
         for(let n = 0; n <= numGens; n++){
-            this.thisPath = this.generate_path(this.thisPath);
+            this.thisPath = this.generate_path_complex(this.thisPath);
         }
     }
 
@@ -101,14 +102,15 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let m = Mat4.identity();
         let numR = 0;
         let numL = 0;
+
         
         
         for(let i = 0; i<this.thisPath.length; i++){
 
             switch(this.thisPath.charAt(i)){
                 case 'S':
+                    m = this.draw_arch(graphics_state, m);
                     m = this.draw_path(graphics_state, m);
-                    console.log('Start');
                     break;
                 case 'R':
                     if(numR!=2){
@@ -120,7 +122,6 @@ class Assignment_Two_Skeleton extends Scene_Component {
                         numL++;
                         numR = 0;
                     }
-                    console.log('Right');
                     break;
                 case 'L':
                     if(numL!=2){
@@ -132,11 +133,9 @@ class Assignment_Two_Skeleton extends Scene_Component {
                         numR++;
                         numL = 0;
                     }
-                    console.log('Left');
                     break;
                 case 'F':
                     m = this.draw_fire(graphics_state, m);
-                    console.log('Fire');
                     break;
                 case 'P':
                     m = this.draw_tile(graphics_state, m);
@@ -144,6 +143,9 @@ class Assignment_Two_Skeleton extends Scene_Component {
             }
 
         }
+        
+        m = m.times(Mat4.translation(Vec.of(0, 0, 9)));
+        this.draw_arch(graphics_state, m);
 
 /*  
 */  
@@ -202,6 +204,16 @@ class Assignment_Two_Skeleton extends Scene_Component {
         m = m.times(Mat4.translation(Vec.of(0, 0, -20)));
 
         return this.draw_tile(graphics_state, m);
+    }
+
+    draw_arch(graphics_state, m){
+        this.shapes['arch'].draw(
+            graphics_state,
+            m,
+            this.shape_materials['fire'] );
+        
+        return m.times(Mat4.translation(Vec.of(0, 0, -12)));
+        
     }
 
     generate_path(str){
