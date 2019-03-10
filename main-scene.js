@@ -27,7 +27,10 @@ class Assignment_Two_Skeleton extends Scene_Component {
             'box': new Cube(),
             'cylinder': new Cylinder(15),
             'cone': new Cone(20),
-            'ball': new Subdivision_Sphere(4)
+            'ball': new Subdivision_Sphere(4),
+            'path' : new Path(),
+            'right_turn' : new RightTurn(),
+            'left_turn' : new LeftTurn()
         }
         this.submit_shapes(context, shapes);
         this.shape_count = Object.keys(shapes).length;
@@ -99,6 +102,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let numR = 0;
         let numL = 0;
         
+        
         for(let i = 0; i<this.thisPath.length; i++){
 
             switch(this.thisPath.charAt(i)){
@@ -140,7 +144,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
             }
 
         }
-         
+
 /*  
 */  
 
@@ -148,12 +152,12 @@ class Assignment_Two_Skeleton extends Scene_Component {
     }
 
     draw_tile(graphics_state, m){
-        this.shapes['square'].draw(
+        this.shapes['path'].draw(
             graphics_state,
             m,
             this.shape_materials['cylinder'] );
         
-        return m.times(Mat4.translation(Vec.of(0, 2, 0)));
+        return m.times(Mat4.translation(Vec.of(0, 0, -20)));
     }
 
     draw_path(graphics_state, m){
@@ -166,35 +170,71 @@ class Assignment_Two_Skeleton extends Scene_Component {
 
     draw_R_turn(graphics_state, m){
 
-        m = this.draw_tile(graphics_state, m);
+        this.shapes['right_turn'].draw(
+            graphics_state,
+            m,
+            this.shape_materials['cylinder'] );
         
-        m = m.times(Mat4.rotation(-Math.PI/2, Vec.of(0,0,1)));
+        m = m.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(-2, 0, -22)));
 
         return this.draw_path(graphics_state, m);
     }
 
     draw_L_turn(graphics_state, m){
 
-        m = this.draw_tile(graphics_state, m);
+        this.shapes['left_turn'].draw(
+            graphics_state,
+            m,
+            this.shape_materials['cylinder'] );
         
-        m = m.times(Mat4.rotation(Math.PI/2, Vec.of(0,0,1)));
+        m = m.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(2, 0, -22)));
 
         return this.draw_path(graphics_state, m);        
     }
 
     draw_fire(graphics_state, m){
         
-        this.shapes['square'].draw(
+        this.shapes['path'].draw(
             graphics_state,
             m,
             this.shape_materials['fire'] );
         
-        m = m.times(Mat4.translation(Vec.of(0, 2, 0)));
+        m = m.times(Mat4.translation(Vec.of(0, 0, -20)));
 
         return this.draw_tile(graphics_state, m);
-    }    
+    }
 
     generate_path(str){
+        let newPath = '';
+        let mostRecentTurn = 'R';
+        for(var i = 0; i<str.length; i++){
+
+            switch(str.charAt(i)){
+                case 'S':
+                    newPath = newPath + 'SF';
+                    break;
+                case 'R':
+                    newPath = newPath + 'FL';
+                    mostRecentTurn = 'L';
+                    break;
+                case 'L':
+                    newPath = newPath + 'FR';
+                    mostRecentTurn = 'R';
+                    break;
+                case 'F':
+                    if(mostRecentTurn=='R'){
+                        newPath = newPath + 'LFR';
+                    } else {
+                        newPath = newPath + 'RFL';
+                        mostRecentTurn = 'L'
+                    }
+            }
+        }
+        return newPath;
+    }
+    
+
+    generate_path_complex(str){
         var R_turns = ['FL','FPL','FRL'];
         var L_turns = ['FR','PRF','RPL'];
         var fire = ['LFR','RFL','RPR'];
