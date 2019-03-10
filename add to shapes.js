@@ -8,7 +8,7 @@ window.Arch = window.classes.Arch = class Arch extends Shape {
         
         // main body
 
-        for( var i = 0; i < 3; i++ ) {
+        for( var i = 0; i < 3; i+=2 ) {
             for( var j = 0; j < 2; j++ ) {
                 var square_transform = Mat4.translation(Vec.of(i == 1 ? (2*j - 1) * 11 : 0, 0, 0))
                     .times( Mat4.rotation( i == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ) )
