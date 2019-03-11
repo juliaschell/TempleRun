@@ -148,7 +148,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         
         graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
 
-        this.shapes.square.draw(graphics_state, (Floor_Center).times(Mat4.scale(Vec.of(400,400,400))), this.shape_materials[1]|| this.difclay);
+        //this.shapes.square.draw(graphics_state, (Floor_Center).times(Mat4.scale(Vec.of(400,400,400))), this.shape_materials[1]|| this.difclay);
         
 
         if (this.Turn_Left){
