@@ -41,6 +41,12 @@ class Assignment_Two_Skeleton extends Scene_Component {
             ambient: .4,
             diffusivity: .4
         });
+
+        this.difclay = context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {
+            ambient: .4,
+            diffusivity: .4
+        });
+
         this.plastic = this.clay.override({
             specularity: .6
         });
@@ -72,6 +78,15 @@ class Assignment_Two_Skeleton extends Scene_Component {
 
         this.t = 0;
 
+
+        this.rotation_count = 0;
+        this.jumpStartTime = 0;
+        this.currentlyJumping = 0;
+        this.jumpHeight = 0;
+
+        this.XZposition = Mat4.translation(Vec.of(0,0,0));
+        this.time_of_turn = 0;
+
         const numGens = 3;
         this.thisPath = 'S';
 
@@ -83,10 +98,20 @@ class Assignment_Two_Skeleton extends Scene_Component {
 
     // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
     make_control_panel() {
-        this.key_triggered_button("Pause Time", ["n"], () => {
+         this.key_triggered_button("Pause Time", ["n"], () => {
             this.paused = !this.paused;
         });
+        this.key_triggered_button("Turn Left", ["h"], () => {
+            this.Turn_Left = !this.Turn_Left;
+        });
+         this.key_triggered_button("Turn Right", ["k"], () => {
+            this.Turn_Right = !this.Turn_Right;
+        });
+         this.key_triggered_button("Jump", ["u"], () => {
+            this.Jump = !this.Jump;
+        });
     }
+       
 
 
     display(graphics_state) {
@@ -98,7 +123,146 @@ class Assignment_Two_Skeleton extends Scene_Component {
             this.t += graphics_state.animation_delta_time / 1000;
         const t = this.t;
 
+        //Begin Stephen's code
         
+        let Floor_Center = Mat4.translation(Vec.of(0,0,0)).times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
+
+
+        let gravity = -10;
+        let jumpTime = 3;
+        let Up_Velocity = -gravity*jumpTime/2;
+        
+        let RunSpeed = 25;
+
+        let Speed = 3;
+        let Bone_Thickness = 0.1;
+
+        let Pelvis_Height = 2;
+        let Torso_Length = 1;
+        let Torso_Tilt = Math.PI/8
+
+        this.jumpHeight = (Up_Velocity*(t-this.jumpStartTime)+gravity*0.5*(t-this.jumpStartTime)*(t-this.jumpStartTime))*this.currentlyJumping;
+        let Variable_Transforms = this.XZposition.times(Mat4.translation(Vec.of(0,0,-RunSpeed*(t-this.time_of_turn)))).times(Mat4.translation(Vec.of(0,this.jumpHeight,0)));
+
+        let Torso_Center = Variable_Transforms.times(Floor_Center).times(Mat4.translation(Vec.of(0,0,-1*(Pelvis_Height+Torso_Length)))).times(Mat4.rotation(-Torso_Tilt,Vec.of(1,0,0)));
+        
+        graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
+
+        this.shapes.square.draw(graphics_state, (Floor_Center).times(Mat4.scale(Vec.of(400,400,400))), this.shape_materials[1]|| this.difclay);
+        
+
+        if (this.Turn_Left){
+            this.XZposition = this.XZposition.times(Mat4.translation(Vec.of(0,0,-RunSpeed*(t-this.time_of_turn)))).times(Mat4.rotation(Math.PI*(1)/2, Vec.of(0,1,0)));
+            this.time_of_turn = t; 
+            this.Turn_Left = false;
+         }
+               
+        if(this.Turn_Right){
+          this.XZposition = this.XZposition.times(Mat4.translation(Vec.of(0,0,-RunSpeed*(t-this.time_of_turn)))).times(Mat4.rotation(Math.PI*(-1)/2, Vec.of(0,1,0)));
+          this.time_of_turn = t;
+          this.Turn_Right = false;
+        }
+
+
+        if(this.Jump){
+           this.jumpStartTime = t;
+           this.currentlyJumping = 1;
+            this.Jump = false;
+        }
+
+        if(this.currentlyJumping > 0)
+        {
+            if((t-this.jumpStartTime) > jumpTime){
+                this.currentlyJumping = 0;
+            }
+        }
+
+
+        //Draw Body
+
+        this.shapes.simplebox.draw(graphics_state, Torso_Center.times(Mat4.scale(Vec.of(Bone_Thickness,Bone_Thickness, Torso_Length))), this.shape_materials[1]|| this.plastic);
+
+        let Shoulders_Center = Torso_Center.times(Mat4.translation(Vec.of(0,0,-1*(Torso_Length+Bone_Thickness))));
+
+
+        let Shoulder_Length = Torso_Length * 0.75;
+
+        this.shapes.simplebox.draw(graphics_state, Shoulders_Center.times(Mat4.scale(Vec.of(Shoulder_Length, Bone_Thickness, Bone_Thickness))), this.shape_materials[1]|| this.plastic);
+
+
+
+        let Pelvis_Center = Torso_Center.times(Mat4.translation(Vec.of(0,0,Torso_Length+Bone_Thickness)))
+        this.shapes.simplebox.draw(graphics_state, Pelvis_Center.times(Mat4.scale(Vec.of(Shoulder_Length, Bone_Thickness, Bone_Thickness))), this.shape_materials[1]||this.plastic);
+
+        let Thigh_Length = Pelvis_Height/4;
+        let Shin_Length = Pelvis_Height/4;
+        let Left_Thigh_Rotation = (Math.PI/4)*( Math.sin(Speed*t) +1);
+        let Left_Shin_Rotation = Left_Thigh_Rotation;
+        let Right_Thigh_Rotation = (Math.PI/4)*(-1*Math.sin(Speed*t) +1);
+        let Right_Shin_Rotation = Right_Thigh_Rotation;
+
+        let Left_Thigh = Pelvis_Center.times(Mat4.translation(Vec.of(-1*(Shoulder_Length+Bone_Thickness), 0,Thigh_Length - Bone_Thickness))).times(Mat4.translation(Vec.of(0,0, -Thigh_Length + Bone_Thickness))).times(Mat4.rotation(Left_Thigh_Rotation, Vec.of(1,0,0))).times(Mat4.translation(Vec.of(0,0,-Bone_Thickness+Thigh_Length)));    
+        this.shapes.simplebox.draw(graphics_state, Left_Thigh.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Thigh_Length))), this.shape_materials[1]||this.plastic);
+        
+
+        let Left_Shin = Left_Thigh.times(Mat4.translation(Vec.of(0,0,Thigh_Length+Shin_Length))).times(Mat4.translation(Vec.of(0,1*Bone_Thickness,-1*Shin_Length))).times(Mat4.rotation(Left_Shin_Rotation, Vec.of(-1,0,0))).times(Mat4.translation(Vec.of(0,-1*Bone_Thickness,Shin_Length)));
+        this.shapes.simplebox.draw(graphics_state, Left_Shin.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Shin_Length))), this.shape_materials[1]||this.plastic);
+
+
+        let Right_Thigh = Pelvis_Center.times(Mat4.translation(Vec.of(Shoulder_Length+Bone_Thickness, 0 ,Thigh_Length - Bone_Thickness))).times(Mat4.translation(Vec.of(0,0, -Thigh_Length + Bone_Thickness))).times(Mat4.rotation(Right_Thigh_Rotation, Vec.of(1,0,0))).times(Mat4.translation(Vec.of(0,0,-Bone_Thickness+Thigh_Length)));
+        this.shapes.simplebox.draw(graphics_state, Right_Thigh.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Thigh_Length))), this.shape_materials[1]||this.plastic);
+        
+        let Right_Shin = Right_Thigh.times(Mat4.translation(Vec.of(0,0,Thigh_Length+Shin_Length))).times(Mat4.translation(Vec.of(0,1*Bone_Thickness,-1*Shin_Length))).times(Mat4.rotation(Right_Shin_Rotation, Vec.of(-1,0,0))).times(Mat4.translation(Vec.of(0,-1*Bone_Thickness,Shin_Length)));
+        this.shapes.simplebox.draw(graphics_state, Right_Shin.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Shin_Length))), this.shape_materials[1]||this.plastic);
+
+        
+        let Arm_Length = Thigh_Length*0.75;
+        let Forearm_Length = Arm_Length;
+
+        let Right_Arm_Rotation = (Math.PI/2)*(Math.sin(Speed*t));
+        let Left_Arm_Rotation = (Math.PI/2)*(Math.sin(-Speed*t));
+        let Right_Forearm_Rotation = -(Math.PI/4)*(Math.sin(-Speed*t)+2);
+        let Left_Forearm_Rotation = -(Math.PI/4)*(Math.sin(Speed*t)+2)
+
+        let Left_Arm = Shoulders_Center.times(Mat4.translation(Vec.of(-1*(Shoulder_Length+Bone_Thickness), 0,Arm_Length - Bone_Thickness))).times(Mat4.translation(Vec.of(0,0, -Arm_Length + Bone_Thickness))).times(Mat4.rotation(Left_Arm_Rotation, Vec.of(1,0,0))).times(Mat4.translation(Vec.of(0,0,-Bone_Thickness+Arm_Length)));    
+        this.shapes.simplebox.draw(graphics_state, Left_Arm.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Arm_Length))), this.shape_materials[1]||this.plastic);
+        
+        let Left_Forearm = Left_Arm.times(Mat4.translation(Vec.of(0,0,Arm_Length+Forearm_Length))).times(Mat4.translation(Vec.of(0,-1*Bone_Thickness,-1*Forearm_Length))).times(Mat4.rotation(Left_Forearm_Rotation, Vec.of(-1,0,0))).times(Mat4.translation(Vec.of(0,1*Bone_Thickness,Forearm_Length)));
+        this.shapes.simplebox.draw(graphics_state, Left_Forearm.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Forearm_Length))), this.shape_materials[1]||this.plastic);
+
+        let Right_Arm = Shoulders_Center.times(Mat4.translation(Vec.of(1*(Shoulder_Length+Bone_Thickness), 0,Arm_Length - Bone_Thickness))).times(Mat4.translation(Vec.of(0,0, -Arm_Length + Bone_Thickness))).times(Mat4.rotation(Right_Arm_Rotation, Vec.of(1,0,0))).times(Mat4.translation(Vec.of(0,0,-Bone_Thickness+Arm_Length)));    
+        this.shapes.simplebox.draw(graphics_state, Right_Arm.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Arm_Length))), this.shape_materials[1]||this.plastic);
+        
+        let Right_Forearm = Right_Arm.times(Mat4.translation(Vec.of(0,0,Arm_Length+Forearm_Length))).times(Mat4.translation(Vec.of(0,-1*Bone_Thickness,-1*Forearm_Length))).times(Mat4.rotation(Right_Forearm_Rotation, Vec.of(-1,0,0))).times(Mat4.translation(Vec.of(0,1*Bone_Thickness,Forearm_Length)));
+        this.shapes.simplebox.draw(graphics_state, Right_Forearm.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Forearm_Length))), this.shape_materials[1]||this.plastic);
+
+        let Neck_Length = Torso_Length/5;
+        let Neck_Rotation = 0;  
+
+        let Neck = Shoulders_Center.times(Mat4.translation(Vec.of(0,0,-1*(Bone_Thickness+Neck_Length)))).times(Mat4.rotation(Neck_Rotation, Vec.of(0,0,1)));
+        this.shapes.simplebox.draw(graphics_state, Neck.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Neck_Length))), this.plastic);  
+        
+
+        let Head_Size = 2*Neck_Length
+        let Head = Neck.times(Mat4.translation(Vec.of(0,0, -1*(Neck_Length + Head_Size))));
+
+        this.shapes.ball.draw(graphics_state, Head.times(Mat4.scale(Vec.of(Head_Size,Head_Size, Head_Size))), this.plastic);
+
+
+
+
+
+
+
+
+        //End Stephen's code
+
+                
+
+
+
+
+
         let m = Mat4.identity();
         let numR = 0;
         let numL = 0;
