@@ -124,13 +124,13 @@ class Assignment_Two_Skeleton extends Scene_Component {
          this.key_triggered_button("Pause Time", ["n"], () => {
             this.paused = !this.paused;
         });
-        this.key_triggered_button("Turn Left", ["h"], () => {
+        this.key_triggered_button("Turn Left", ["ArrowLeft"], () => {
             this.Turn_Left = !this.Turn_Left;
         });
-         this.key_triggered_button("Turn Right", ["k"], () => {
+         this.key_triggered_button("Turn Right", ["ArrowRight"], () => {
             this.Turn_Right = !this.Turn_Right;
         });
-         this.key_triggered_button("Jump", ["u"], () => {
+         this.key_triggered_button("Jump", ["ArrowUp"], () => {
             this.Jump = !this.Jump;
         });
     }
@@ -151,11 +151,11 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let Floor_Center = Mat4.translation(Vec.of(0,0,0)).times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
 
 
-        let gravity = -10;
-        let jumpTime = 3;
+        let gravity = -40;
+        let jumpTime = 1;
         let Up_Velocity = -gravity*jumpTime/2;
         
-        let RunSpeed = 25;
+        let RunSpeed = 40;
 
         let Speed = 3;
         let Bone_Thickness = 0.1;
@@ -167,7 +167,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         this.jumpHeight = (Up_Velocity*(t-this.jumpStartTime)+gravity*0.5*(t-this.jumpStartTime)*(t-this.jumpStartTime))*this.currentlyJumping;
         let Variable_Transforms = this.XZposition.times(Mat4.translation(Vec.of(0,0,-RunSpeed*(t-this.time_of_turn)))).times(Mat4.translation(Vec.of(0,this.jumpHeight,0)));
 
-        let Torso_Center = Variable_Transforms.times(Floor_Center).times(Mat4.translation(Vec.of(0,0,-1*(Pelvis_Height+Torso_Length)))).times(Mat4.rotation(-Torso_Tilt,Vec.of(1,0,0)));
+        let Torso_Center = Variable_Transforms.times(Floor_Center).times(Mat4.translation(Vec.of(0,0,-1*(Pelvis_Height+Torso_Length+3)))).times(Mat4.rotation(-Torso_Tilt,Vec.of(1,0,0)));
         
         graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
 

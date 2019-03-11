@@ -414,7 +414,7 @@ window.LeftTurn = window.classes.LeftTurn = class LeftTurn extends Shape {
                     .times( Mat4.rotation( i == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ))
                     .times( Mat4.rotation( Math.PI * j - ( i == 1 ? Math.PI/2 : 0 ), Vec.of( 0, 1, 0 ) ) )
                     .times( Mat4.translation([ 0, 0, 1 ]) )
-                    .times( Mat4.scale( [ i == 1 ? 10 : 11, i == 0 ? 11 : 1, 1]) ) ;
+                    .times( Mat4.scale( [ i == 1 ? 10 : 12, i == 0 ? 12 : 1, 1]) ) ;
         
                 Square.insert_transformed_copy_into( this, [], square_transform );
             }
