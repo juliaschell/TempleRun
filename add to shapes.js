@@ -6,59 +6,35 @@ window.Arch = window.classes.Arch = class Arch extends Shape {
     constructor(sections) {
         super("positions", "normals", "texture_coords");
         
-        // main body
-
-        for( var i = 0; i < 3; i+=2 ) {
-            for( var j = 0; j < 2; j++ ) {
-                var square_transform = Mat4.translation(Vec.of(i == 1 ? (2*j - 1) * 11 : 0, 0, 0))
-                    .times( Mat4.rotation( i == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ) )
-                    .times( Mat4.rotation( Math.PI * j - ( i == 1 ? Math.PI/2 : 0 ), Vec.of( 0, 1, 0 ) ) )
-                    .times( Mat4.translation([ 0, 0, 1]) )
-                    .times( Mat4.scale( [ i == 1 ? 1 : 12, 1, 1]) ) ;
+        // top/bottom
         
-                Square.insert_transformed_copy_into( this, [], square_transform );
+        for ( var k = 0; k < 2; k++) {
+            for( var i = 0; i < 3; i++ ) {
+                for( var j = 0; j < 2; j++ ) {
+                    var square_transform = Mat4.translation(Vec.of(i == 1 ? (2*j - 1) * 11 : 0, k*12, 0))
+                        .times( Mat4.rotation( i == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ) )
+                        .times( Mat4.rotation( Math.PI * j - ( i == 1 ? Math.PI/2 : 0 ), Vec.of( 0, 1, 0 ) ) )
+                        .times( Mat4.translation([ 0, 0, 1]) )
+                        .times( Mat4.scale( [ i == 1 ? 1 : 12, 1, 1]) ) ;
+
+                    Square.insert_transformed_copy_into( this, [], square_transform );
+                }
             }
         }
 
-        // left ridge
+        // posts
 
-        for ( var m = 0; m < 3; m++ ) {
-            for( var n = 0; n < 2; n++ ) {
-                var square_transform = Mat4.translation( [-11, 5, 0])
-                    .times( Mat4.rotation( m == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ) )
-                    .times( Mat4.rotation( Math.PI * n - ( m == 1 ? Math.PI/2 : 0 ), Vec.of( 0, 1, 0 ) ) )
-                    .times( Mat4.translation([ 0, 0, m == 0 ? 6 : (m == 1 ? 1 : 1) ]) )
-                    .times( Mat4.scale( [ m == 1 ? 1 : 1, m == 0 ? 1 : 6, 1]) ) ;
-        
-                Square.insert_transformed_copy_into( this, [], square_transform );
-            }
-        }    
+        for ( var k = -1; k < 2; k+= 2){
+            for ( var m = 0; m < 3; m++ ) {
+                for( var n = 0; n < (m == 0 ? 1 : 2); n++ ) {
+                    var square_transform = Mat4.translation( [k * 11, 5, 0])
+                        .times( Mat4.rotation( m == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ) )
+                        .times( Mat4.rotation( Math.PI * n - ( m == 1 ? Math.PI/2 : 0 ), Vec.of( 0, 1, 0 ) ) )
+                        .times( Mat4.translation([ 0, 0, m == 0 ? 6 : 1 ]) )
+                        .times( Mat4.scale( [ 1, m == 0 ? 1 : 6, 1]) ) ;
 
-        // right ridge
-
-        for ( var m = 0; m < 3; m++ ) {
-            for( var n = 0; n < 2; n++ ) {
-                var square_transform = Mat4.translation( [11, 5, 0])
-                    .times( Mat4.rotation( m == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ) )
-                    .times( Mat4.rotation( Math.PI * n - ( m == 1 ? Math.PI/2 : 0 ), Vec.of( 0, 1, 0 ) ) )
-                    .times( Mat4.translation([ 0, 0, m == 0 ? 6 : (m == 1 ? 1 : 1) ]) )
-                    .times( Mat4.scale( [ m == 1 ? 1 : 1, m == 0 ? 1 : 6, 1]) ) ;
-        
-                Square.insert_transformed_copy_into( this, [], square_transform );
-            }
-        }
-
-        // top piece 
-
-        for( var i = 0; i < 3; i++ ) {
-            for( var j = 0; j < 2; j++ ) {
-                var square_transform = Mat4.translation(Vec.of(i == 1 ? (2*j - 1) * 11 : 0, 12, 0))
-                    .times( Mat4.rotation( i == 0 ? Math.PI/2 : 0, Vec.of(1, 0, 0) ) )
-                    .times( Mat4.rotation( Math.PI * j - ( i == 1 ? Math.PI/2 : 0 ), Vec.of( 0, 1, 0 ) ) )
-                    .times( Mat4.translation([ 0, 0, 1]) )
-                    .times( Mat4.scale( [ i == 1 ? 1 : 12, 1, 1]) ) ;
-        
-                Square.insert_transformed_copy_into( this, [], square_transform );
+                    Square.insert_transformed_copy_into( this, [], square_transform );
+                }
             }
         }
 
@@ -251,4 +227,5 @@ window.LeftTurn = window.classes.LeftTurn = class LeftTurn extends Shape {
             }
         }       
     }
+}
 }
