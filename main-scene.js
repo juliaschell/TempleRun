@@ -93,6 +93,29 @@ class Assignment_Two_Skeleton extends Scene_Component {
         for(let n = 0; n <= numGens; n++){
             this.thisPath = this.generate_path_complex(this.thisPath);
         }
+        
+        // VARIABLES USED TO GENERATE FIRE PARTICLES ---------------------------------------------------
+        this.bright = [];       // array for brightness of each particle
+        this.x = [];            // array for x,y,z positions of each particle
+        this.y = [];
+        this.z = [];
+        this.xVel = [];         // array for x velocity of each particle
+
+        this.numparticles = 500;       // total number of particles
+        this.xMax = 20;                  // initial position scalars (2 means -1 to +1)
+        this.yMax = 1;
+        this.zMax = 5;
+        this.velocity = 1;              // initial x velocity scalar
+
+        // generate initial particle brightness, positions, velocities
+        for (var i = 0; i < this.numparticles; i ++) {
+            this.bright.push(.2 + Math.random());
+
+            this.x.push(this.xMax*(Math.random()-0.5));
+            this.y.push(this.yMax*(Math.random()+2));
+            this.z.push(this.zMax*(Math.random()-0.5));
+            this.xVel.push(this.velocity*(Math.random()-0.5));
+        }
     }
 
 
@@ -299,7 +322,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
                     }
                     break;
                 case 'F':
-                    m = this.draw_fire(graphics_state, m);
+                    m = this.draw_fire(graphics_state, m, this.bright);
                     break;
                 case 'P':
                     m = this.draw_tile(graphics_state, m);
@@ -358,16 +381,46 @@ class Assignment_Two_Skeleton extends Scene_Component {
         return this.draw_path(graphics_state, m);        
     }
 
-    draw_fire(graphics_state, m){
-        
-        this.shapes['path'].draw(
-            graphics_state,
-            m,
-            this.shape_materials['fire'] );
-        
-        m = m.times(Mat4.translation(Vec.of(0, 0, -20)));
+    draw_fire(graphics_state, m, bright) {
 
-        return this.draw_tile(graphics_state, m);
+        m = this.draw_tile(graphics_state, m);
+            
+        let mScale = Mat4.scale(Vec.of(0.5,0.5,0.5));
+
+        // update them, and draw them
+        for (var i = 0; i < this.numparticles; i++) {
+
+            // update brightness, velocity, position
+            this.bright[i] = this.bright[i] - 0.1*Math.random();
+            this.xVel[i] = this.xVel[i]*(2.5*(Math.random() - 0.5));
+
+
+            this.x[i] = this.x[i] + this.xVel[i];
+            //this.x[i] = this.x[i] + 0.2*(Math.random() - 0.5);
+            this.y[i] = this.y[i] + 0.5*Math.random();
+            this.z[i] = this.z[i] + 0.2*(Math.random() - 0.5);
+
+            
+            // particle is dead, must be "respawned"
+            if (this.bright[i] <= 0) {
+                this.bright[i] = .2 + Math.random();
+                this.x[i] = this.xMax*(Math.random()-0.5);
+                this.y[i] = this.yMax*(Math.random()+2);
+                this.z[i] = this.zMax*(Math.random()-0.5);
+                this.xVel[i] = this.velocity*(Math.random()-0.5);
+            }
+
+
+            let position = Vec.of(this.x[i], this.y[i], this.z[i]);
+
+            // draw particle
+            this.shapes.circle.draw(
+                graphics_state, m.times(Mat4.translation(position)).times(mScale),
+                this.clay.override({color: Color.of(2*this.bright[i], bright[i], 0, bright[i])})
+            )
+            
+            return this.draw_tile(graphics_state, m);
+        }
     }
 
     draw_arch(graphics_state, m){
