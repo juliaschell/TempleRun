@@ -1,4 +1,4 @@
-let RunSpeed = 25;
+let RunSpeed = 50;
 let on_fire = false;
 let straightAway = false;
 
@@ -72,7 +72,8 @@ class Assignment_Two_Skeleton extends Scene_Component {
             circle: "assets/hypnosis.jpg",
             fire: "assets/fire.png",
             floor: "assets/floor_tiles_2.png",
-            walls: "assets/wall_tiles.png"
+            walls: "assets/wall_tiles.png",
+            tiles: "assets/floor_tiles_1.png"
         };
         for (let t in shape_textures)
             this.shape_materials[t] = this.texture_base.override({
@@ -157,7 +158,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let jumpTime = 1;
         let Up_Velocity = -gravity*jumpTime/2;
 
-        let Speed = 3;
+        let Speed = 5;
         let Bone_Thickness = 0.1;
 
         let Pelvis_Height = 2;
@@ -172,7 +173,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         
         let Torso_Center = Variable_Transforms.times(Floor_Center).times(Mat4.translation(Vec.of(0,0,-1*(Pelvis_Height+Torso_Length+3)))).times(Mat4.rotation(-Torso_Tilt,Vec.of(1,0,0)));
         
-        graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
+        //graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
 
         //this.shapes.square.draw(graphics_state, (Floor_Center).times(Mat4.scale(Vec.of(400,400,400))), this.shape_materials[1]|| this.difclay);
         
@@ -284,6 +285,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
             switch(this.thisPath.charAt(i)){
                 case 'S':
                     m = this.draw_arch(graphics_state, m);
+                    m = this.draw_path(graphics_state, m, char_pos);
                     m = this.draw_path(graphics_state, m, char_pos);
                     break;
                 case 'R':
@@ -491,7 +493,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
             m,
             this.shape_materials['fire'] );
         
-        return m.times(Mat4.translation(Vec.of(0, 0, -12)));
+        return m.times(Mat4.translation(Vec.of(0, 2, -11)));
         
     }
 
