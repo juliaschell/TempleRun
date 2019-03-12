@@ -1,3 +1,7 @@
+let RunSpeed = 25;
+let on_fire = false;
+let straightAway = false;
+
 class Assignment_Two_Skeleton extends Scene_Component {
     // The scene begins by requesting the camera, shapes, and materials it will need.
     constructor(context, control_box) {
@@ -117,7 +121,6 @@ class Assignment_Two_Skeleton extends Scene_Component {
             this.z.push(this.zMax*(Math.random()-0.5));
             this.xVel.push(this.velocity*(Math.random()-0.5));
         }
-
     }
 
 
@@ -137,8 +140,6 @@ class Assignment_Two_Skeleton extends Scene_Component {
         });
     }
        
-
-
     display(graphics_state) {
         // Use the lights stored in this.lights.
         graphics_state.lights = this.lights;
@@ -148,16 +149,14 @@ class Assignment_Two_Skeleton extends Scene_Component {
             this.t += graphics_state.animation_delta_time / 1000;
         const t = this.t;
 
+
         //Begin Stephen's code
         
         let Floor_Center = Mat4.translation(Vec.of(0,0,0)).times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)));
 
-
         let gravity = -40;
         let jumpTime = 1;
         let Up_Velocity = -gravity*jumpTime/2;
-        
-        let RunSpeed = 30;
 
         let Speed = 3;
         let Bone_Thickness = 0.1;
@@ -167,22 +166,25 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let Torso_Tilt = Math.PI/8
 
         this.jumpHeight = (Up_Velocity*(t-this.jumpStartTime)+gravity*0.5*(t-this.jumpStartTime)*(t-this.jumpStartTime))*this.currentlyJumping;
+        
         let Variable_Transforms = this.XZposition.times(Mat4.translation(Vec.of(0,0,-RunSpeed*(t-this.time_of_turn)))).times(Mat4.translation(Vec.of(0,this.jumpHeight,0)));
 
+        var char_pos = Vec.of(Variable_Transforms[0][3], Variable_Transforms[1][3], Variable_Transforms[2][3]);
+        
         let Torso_Center = Variable_Transforms.times(Floor_Center).times(Mat4.translation(Vec.of(0,0,-1*(Pelvis_Height+Torso_Length+3)))).times(Mat4.rotation(-Torso_Tilt,Vec.of(1,0,0)));
         
-        //graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
+        graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
 
         //this.shapes.square.draw(graphics_state, (Floor_Center).times(Mat4.scale(Vec.of(400,400,400))), this.shape_materials[1]|| this.difclay);
         
 
-        if (this.Turn_Left){
+        if (this.Turn_Left && straightAway == false){
             this.XZposition = this.XZposition.times(Mat4.translation(Vec.of(0,0,-RunSpeed*(t-this.time_of_turn)))).times(Mat4.rotation(Math.PI*(1)/2, Vec.of(0,1,0)));
             this.time_of_turn = t; 
             this.Turn_Left = false;
          }
                
-        if(this.Turn_Right){
+        if(this.Turn_Right && straightAway == false){
           this.XZposition = this.XZposition.times(Mat4.translation(Vec.of(0,0,-RunSpeed*(t-this.time_of_turn)))).times(Mat4.rotation(Math.PI*(-1)/2, Vec.of(0,1,0)));
           this.time_of_turn = t;
           this.Turn_Right = false;
@@ -209,12 +211,9 @@ class Assignment_Two_Skeleton extends Scene_Component {
 
         let Shoulders_Center = Torso_Center.times(Mat4.translation(Vec.of(0,0,-1*(Torso_Length+Bone_Thickness))));
 
-
         let Shoulder_Length = Torso_Length * 0.75;
 
         this.shapes.simplebox.draw(graphics_state, Shoulders_Center.times(Mat4.scale(Vec.of(Shoulder_Length, Bone_Thickness, Bone_Thickness))), this.shape_materials[1]|| this.plastic);
-
-
 
         let Pelvis_Center = Torso_Center.times(Mat4.translation(Vec.of(0,0,Torso_Length+Bone_Thickness)))
         this.shapes.simplebox.draw(graphics_state, Pelvis_Center.times(Mat4.scale(Vec.of(Shoulder_Length, Bone_Thickness, Bone_Thickness))), this.shape_materials[1]||this.plastic);
@@ -229,10 +228,8 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let Left_Thigh = Pelvis_Center.times(Mat4.translation(Vec.of(-1*(Shoulder_Length+Bone_Thickness), 0,Thigh_Length - Bone_Thickness))).times(Mat4.translation(Vec.of(0,0, -Thigh_Length + Bone_Thickness))).times(Mat4.rotation(Left_Thigh_Rotation, Vec.of(1,0,0))).times(Mat4.translation(Vec.of(0,0,-Bone_Thickness+Thigh_Length)));    
         this.shapes.simplebox.draw(graphics_state, Left_Thigh.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Thigh_Length))), this.shape_materials[1]||this.plastic);
         
-
         let Left_Shin = Left_Thigh.times(Mat4.translation(Vec.of(0,0,Thigh_Length+Shin_Length))).times(Mat4.translation(Vec.of(0,1*Bone_Thickness,-1*Shin_Length))).times(Mat4.rotation(Left_Shin_Rotation, Vec.of(-1,0,0))).times(Mat4.translation(Vec.of(0,-1*Bone_Thickness,Shin_Length)));
         this.shapes.simplebox.draw(graphics_state, Left_Shin.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Shin_Length))), this.shape_materials[1]||this.plastic);
-
 
         let Right_Thigh = Pelvis_Center.times(Mat4.translation(Vec.of(Shoulder_Length+Bone_Thickness, 0 ,Thigh_Length - Bone_Thickness))).times(Mat4.translation(Vec.of(0,0, -Thigh_Length + Bone_Thickness))).times(Mat4.rotation(Right_Thigh_Rotation, Vec.of(1,0,0))).times(Mat4.translation(Vec.of(0,0,-Bone_Thickness+Thigh_Length)));
         this.shapes.simplebox.draw(graphics_state, Right_Thigh.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Thigh_Length))), this.shape_materials[1]||this.plastic);
@@ -240,7 +237,6 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let Right_Shin = Right_Thigh.times(Mat4.translation(Vec.of(0,0,Thigh_Length+Shin_Length))).times(Mat4.translation(Vec.of(0,1*Bone_Thickness,-1*Shin_Length))).times(Mat4.rotation(Right_Shin_Rotation, Vec.of(-1,0,0))).times(Mat4.translation(Vec.of(0,-1*Bone_Thickness,Shin_Length)));
         this.shapes.simplebox.draw(graphics_state, Right_Shin.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Shin_Length))), this.shape_materials[1]||this.plastic);
 
-        
         let Arm_Length = Thigh_Length*0.75;
         let Forearm_Length = Arm_Length;
 
@@ -267,77 +263,79 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let Neck = Shoulders_Center.times(Mat4.translation(Vec.of(0,0,-1*(Bone_Thickness+Neck_Length)))).times(Mat4.rotation(Neck_Rotation, Vec.of(0,0,1)));
         this.shapes.simplebox.draw(graphics_state, Neck.times(Mat4.scale(Vec.of(Bone_Thickness, Bone_Thickness, Neck_Length))), this.plastic);  
         
-
         let Head_Size = 2*Neck_Length
         let Head = Neck.times(Mat4.translation(Vec.of(0,0, -1*(Neck_Length + Head_Size))));
 
-        this.shapes.ball.draw(graphics_state, Head.times(Mat4.scale(Vec.of(Head_Size,Head_Size, Head_Size))), this.plastic);
+        //check to see if he is on fire
+        if (on_fire == true){
+            this.shapes.ball.draw(graphics_state, Head.times(Mat4.scale(Vec.of(Head_Size*2,Head_Size*2, Head_Size*2))), this.shape_materials['fire']);
+        }
+        else {
+            this.shapes.ball.draw(graphics_state, Head.times(Mat4.scale(Vec.of(Head_Size,Head_Size, Head_Size))), this.plastic);
 
-
-
-
-
-
-
-
+        }
         //End Stephen's code
 
         
         let m = Mat4.identity();
         let numR = 0;
-        let numL = 0;
-
-        
-        
+        let numL = 0;     
         for(let i = 0; i<this.thisPath.length; i++){
 
             switch(this.thisPath.charAt(i)){
                 case 'S':
                     m = this.draw_arch(graphics_state, m);
-                    m = this.draw_path(graphics_state, m);
+                    m = this.draw_path(graphics_state, m, char_pos);
                     break;
                 case 'R':
                     if(numR!=2){
-                        m = this.draw_R_turn(graphics_state, m);
+                        m = this.draw_R_turn(graphics_state, m, char_pos);
                         numR++;
                         numL = 0;
                     } else {
-                        m = this.draw_L_turn(graphics_state, m);
+                        m = this.draw_L_turn(graphics_state, m, char_pos);
                         numL++;
                         numR = 0;
                     }
                     break;
                 case 'L':
                     if(numL!=2){
-                        m = this.draw_L_turn(graphics_state, m);
+                        m = this.draw_L_turn(graphics_state, m, char_pos);
                         numL++;
                         numR = 0;
                     } else {
-                        m = this.draw_R_turn(graphics_state, m);
+                        m = this.draw_R_turn(graphics_state, m, char_pos);
                         numR++;
                         numL = 0;
                     }
                     break;
                 case 'F':
-                    m = this.draw_fire(graphics_state, m, this.bright);
+                    m = this.draw_fire(graphics_state, m, this.bright, char_pos);
                     break;
                 case 'P':
-                    m = this.draw_tile(graphics_state, m);
-
+                    m = this.draw_tile(graphics_state, m, char_pos);
+                
             }
 
         }
         
         m = m.times(Mat4.translation(Vec.of(0, 0, 9)));
-        this.draw_arch(graphics_state, m);
-
-/*  
-*/  
-
+        this.draw_arch(graphics_state, m); 
 
     }
 
-    draw_tile(graphics_state, m){
+
+    //end of display()
+
+
+    ///////////////////////////////////////
+    ///     Draw Tile                   ///
+    ///////////////////////////////////////
+
+    draw_tile(graphics_state, m, char_pos){
+
+         
+
         this.shapes['path'].draw(
             graphics_state,
             m,
@@ -346,17 +344,47 @@ class Assignment_Two_Skeleton extends Scene_Component {
         return m.times(Mat4.translation(Vec.of(0, 0, -20)));
     }
 
-    draw_path(graphics_state, m){
+    ///////////////////////////////////////
+    ///     Draw Path                   ///
+    ///////////////////////////////////////
+
+    draw_path(graphics_state, m, char_pos){       
         
-        m = this.draw_tile(graphics_state, m);
-        m = this.draw_tile(graphics_state, m);
+        //collision detection for running into fire
+        let wall_pos = Vec.of(m[0][3], m[1][3], m[2][3]);
+
+        let inbounds = char_pos.minus(wall_pos);
+
+        if( inbounds.norm() <= 8.5 ) {
+            
+            straightAway = true;
+        }
+
+        
+        m = this.draw_tile(graphics_state, m, char_pos);
+        m = this.draw_tile(graphics_state, m, char_pos);
+
 
         return m;                 
     }
 
-    draw_R_turn(graphics_state, m){
+    ///////////////////////////////////////
+    ///     Draw R_turn                 ///
+    ///////////////////////////////////////
+
+    draw_R_turn(graphics_state, m, char_pos){
 
         m = m.times(Mat4.translation(Vec.of(0, 0, -2)));
+
+        //collision detection for running into fire
+        let wall_pos = Vec.of(m[0][3], m[1][3], m[2][3]);
+
+        let inbounds = char_pos.minus(wall_pos);
+
+        if( inbounds.norm() <= 8.5 ) {
+            
+            straightAway = false;
+        }
 
         this.shapes['right_turn'].draw(
             graphics_state,
@@ -365,13 +393,26 @@ class Assignment_Two_Skeleton extends Scene_Component {
         
         m = m.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(0, 0, -22)));
 
-        return this.draw_path(graphics_state, m);
+        return this.draw_path(graphics_state, m, char_pos);
     }
 
-    draw_L_turn(graphics_state, m){
+    ///////////////////////////////////////
+    ///     Draw L_turn                 ///
+    ///////////////////////////////////////
+    
+    draw_L_turn(graphics_state, m, char_pos){
 
         m = m.times(Mat4.translation(Vec.of(0, 0, -2)));
 
+        //collision detection for running into fire
+        let wall_pos = Vec.of(m[0][3], m[1][3], m[2][3]);
+
+        let inbounds = char_pos.minus(wall_pos);
+
+        if( inbounds.norm() <= 8.5 ) {
+            
+            straightAway = false;
+        }
 
         this.shapes['right_turn'].draw(
             graphics_state,
@@ -380,14 +421,29 @@ class Assignment_Two_Skeleton extends Scene_Component {
         
         m = m.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(0, 0, -22)));
 
-        return this.draw_path(graphics_state, m);        
+        return this.draw_path(graphics_state, m, char_pos);        
     }
 
-     draw_fire(graphics_state, m, bright) {
+    ///////////////////////////////////////
+    ///     Draw Fire                   ///
+    ///////////////////////////////////////
         
-        this.draw_tile(graphics_state,m);
+     draw_fire(graphics_state, m, bright, char_pos) {
+        
+        //collision detection for running into fire
+        let fire_pos = Vec.of(m[0][3], m[1][3], m[2][3]);
+
+        let distance = char_pos.minus(fire_pos);
+
+        if( distance.norm() <= 3 ) {
+            
+            on_fire = true;
+            //RunSpeed += 5;
+        }
+        
+        //m = this.draw_tile(graphics_state,m);
        
-        let mScale = Mat4.scale(Vec.of(0.3,0.3,0.3));
+        let mScale = Mat4.scale(Vec.of(0.3,0.3,0.3));       //size of each fire particle
 
         // update them, and draw them
         for (var i = 0; i < this.numparticles; i++) {
@@ -412,7 +468,6 @@ class Assignment_Two_Skeleton extends Scene_Component {
                 this.xVel[i] = this.velocity*(Math.random()-0.5);
             }
 
-
             let position = Vec.of(this.x[i], this.y[i], this.z[i]);
 
             // draw particle
@@ -420,16 +475,22 @@ class Assignment_Two_Skeleton extends Scene_Component {
                 graphics_state, m.times(Mat4.translation(position)).times(mScale),
                 this.clay.override({color: Color.of(2*this.bright[i], bright[i], 0, bright[i])})
             )
+ 
         }
+
+        m = this.draw_tile(graphics_state,m,char_pos);
         
-        return this.draw_tile(graphics_state,m);
+        return this.draw_path(graphics_state,m,char_pos);
     }
+
+    //end of draw_fire()
+
 
     draw_arch(graphics_state, m){
         this.shapes['arch'].draw(
             graphics_state,
             m,
-            this.shape_materials['walls'] );
+            this.shape_materials['fire'] );
         
         return m.times(Mat4.translation(Vec.of(0, 0, -12)));
         
