@@ -67,7 +67,9 @@ class Assignment_Two_Skeleton extends Scene_Component {
             simplebox: "assets/tetrahedron-texture2.png",
             cone: "assets/hypnosis.jpg",
             circle: "assets/hypnosis.jpg",
-            fire: "assets/fire.png"
+            fire: "assets/fire.png",
+            floor: "assets/floor_tiles_2.png",
+            walls: "assets/wall_tiles.png"
         };
         for (let t in shape_textures)
             this.shape_materials[t] = this.texture_base.override({
@@ -155,7 +157,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         let jumpTime = 1;
         let Up_Velocity = -gravity*jumpTime/2;
         
-        let RunSpeed = 40;
+        let RunSpeed = 30;
 
         let Speed = 3;
         let Bone_Thickness = 0.1;
@@ -169,7 +171,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
 
         let Torso_Center = Variable_Transforms.times(Floor_Center).times(Mat4.translation(Vec.of(0,0,-1*(Pelvis_Height+Torso_Length+3)))).times(Mat4.rotation(-Torso_Tilt,Vec.of(1,0,0)));
         
-        graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
+        //graphics_state.camera_transform = Mat4.translation(Vec.of(0,-10,-35)).times(Mat4.inverse(Variable_Transforms));
 
         //this.shapes.square.draw(graphics_state, (Floor_Center).times(Mat4.scale(Vec.of(400,400,400))), this.shape_materials[1]|| this.difclay);
         
@@ -339,7 +341,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         this.shapes['path'].draw(
             graphics_state,
             m,
-            this.shape_materials['cylinder'] );
+            this.shape_materials['floor'] );
         
         return m.times(Mat4.translation(Vec.of(0, 0, -20)));
     }
@@ -354,24 +356,29 @@ class Assignment_Two_Skeleton extends Scene_Component {
 
     draw_R_turn(graphics_state, m){
 
+        m = m.times(Mat4.translation(Vec.of(0, 0, -2)));
+
         this.shapes['right_turn'].draw(
             graphics_state,
             m,
-            this.shape_materials['cylinder'] );
+            this.shape_materials['floor'] );
         
-        m = m.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(-2, 0, -22)));
+        m = m.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(0, 0, -22)));
 
         return this.draw_path(graphics_state, m);
     }
 
     draw_L_turn(graphics_state, m){
 
-        this.shapes['left_turn'].draw(
+        m = m.times(Mat4.translation(Vec.of(0, 0, -2)));
+
+
+        this.shapes['right_turn'].draw(
             graphics_state,
-            m,
-            this.shape_materials['cylinder'] );
+            m.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0))),
+            this.shape_materials['floor'] );
         
-        m = m.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(2, 0, -22)));
+        m = m.times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0))).times(Mat4.translation(Vec.of(0, 0, -22)));
 
         return this.draw_path(graphics_state, m);        
     }
@@ -422,7 +429,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
         this.shapes['arch'].draw(
             graphics_state,
             m,
-            this.shape_materials['fire'] );
+            this.shape_materials['walls'] );
         
         return m.times(Mat4.translation(Vec.of(0, 0, -12)));
         
