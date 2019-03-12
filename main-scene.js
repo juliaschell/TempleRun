@@ -33,8 +33,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
             'cone': new Cone(20),
             'ball': new Subdivision_Sphere(4),
             'path' : new Path(),
-            'right_turn' : new RightTurn(),
-            'left_turn' : new LeftTurn(),
+            'turn' : new Turn(),
             'arch': new Arch()
         }
         this.submit_shapes(context, shapes);
@@ -386,7 +385,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
             straightAway = false;
         }
 
-        this.shapes['right_turn'].draw(
+        this.shapes['turn'].draw(
             graphics_state,
             m,
             this.shape_materials['floor'] );
@@ -414,7 +413,7 @@ class Assignment_Two_Skeleton extends Scene_Component {
             straightAway = false;
         }
 
-        this.shapes['right_turn'].draw(
+        this.shapes['turn'].draw(
             graphics_state,
             m.times(Mat4.rotation(-Math.PI/2, Vec.of(0,1,0))),
             this.shape_materials['floor'] );
